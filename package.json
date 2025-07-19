@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn src/server.ts",
-    "seed": "ts-node scripts/seedBooks.ts"
+    "seed": "ts-node scripts/seedBooks.ts",
+     "build": "tsc",
+    "start": "node dist/server.ts"
   },
   "keywords": [],
   "author": "",
