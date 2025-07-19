@@ -1,9 +1,13 @@
-// src\routes\whatsappRoute.ts
 import { Router } from "express";
+import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
 const router = Router();
 
-const VERIFY_TOKEN = "myVerifyToken123"; // use the same as in Meta UI
+const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN!;
+const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID!;
+const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN!;
 
 router.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
@@ -18,26 +22,50 @@ router.get("/webhook", (req, res) => {
   }
 });
 
-router.post("/webhook", (req, res) => {
+router.post("/webhook", async (req, res) => {
   const body = req.body;
 
   if (body.object === "whatsapp_business_account") {
-    (body.entry as any[]).forEach((entry: any) => {
-      (entry.changes as any[]).forEach((change: any) => {
+    (body.entry as any[]).forEach(async (entry: any) => {
+      (entry.changes as any[]).forEach(async (change: any) => {
         const messages = change.value?.messages;
         if (messages) {
-          (messages as any[]).forEach((message: any) => {
-            console.log("📩 WhatsApp message received:", message);
-            // Optional: Add your logic here
-          });
+          for (const message of messages) {
+            const from = message.from; // sender's phone number
+            const text = message.text?.body;
+
+            console.log("📩 WhatsApp message received:", { from, text });
+
+            try {
+              await axios.post(
+                `https://graph.facebook.com/v19.0/${PHONE_NUMBER_ID}/messages`,
+                {
+                  messaging_product: "whatsapp",
+                  to: from,
+                  text: {
+                    body: "Thanks for your message! We'll get back to you shortly.",
+                  },
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${ACCESS_TOKEN}`,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+              console.log("✅ Auto-reply sent");
+            } catch (error: any) {
+              console.error("❌ Failed to send reply:", error?.response?.data || error.message);
+            }
+          }
         }
       });
     });
+
     return res.sendStatus(200);
   }
 
   return res.sendStatus(404);
 });
-
 
 export default router;
