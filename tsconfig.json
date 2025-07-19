@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "module": "commonjs",
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -8,5 +8,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src", "drizzle.config.ts", "scripts"]
+  "include": ["src", "drizzle.config.ts"]
 }
