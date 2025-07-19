@@ -2,6 +2,5 @@
 node_modules
 dist
 .env
-pnpm-lock.yaml
 .DS_Store
 google-vision.json
