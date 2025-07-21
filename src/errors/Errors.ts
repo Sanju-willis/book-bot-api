@@ -1,3 +1,4 @@
+// src\errors\Errors.ts
 export class BaseError extends Error {
   public readonly name: string;
   public readonly httpCode: number;
@@ -90,5 +91,13 @@ export class BookExtractionError extends BaseError {
 export class BookNotFoundError extends BaseError {
   constructor(description = "Book not found in inventory") {
     super("BookNotFoundError", 404, description);
+  }
+}
+export class AppError extends Error {
+  public statusCode: number;
+  constructor(message: string, statusCode = 400) {
+    super(message);
+    this.statusCode = statusCode;
+    Error.captureStackTrace(this, this.constructor);
   }
 }
