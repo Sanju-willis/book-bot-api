@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/chat", webRoute);
-app.use("/webhook/whatsapp", whatsappRoute);
+app.use("/whatsapp", whatsappRoute);
 app.use("/webhook/messenger", messengerRoute);
 app.use("/webhook/instagram", instagramRoute);
 

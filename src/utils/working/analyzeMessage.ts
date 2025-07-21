@@ -1,4 +1,4 @@
-// src\utils\analyzeMessage.ts
+// src\utils\working\analyzeMessage.ts
 import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
@@ -51,11 +51,10 @@ export type AnalyzeResult = {
     | "order_status"
     | "complaint"
     | "greeting"
-    | "smalltalk"
     | "goodbye"
     | "unknown";
   confidence: number;
-  content_type: "book" | "receipt" | "text_only" | "other";
+  content_type: "book" | "receipt" | "text_only" | "unknown";
   data: Record<string, any>;
 };
 
@@ -81,7 +80,7 @@ export const analyzeMessage = async ({
     return {
       intent: "unknown",
       confidence: 0,
-      content_type: "other",
+      content_type: "unknown",
       data: {},
     };
   }

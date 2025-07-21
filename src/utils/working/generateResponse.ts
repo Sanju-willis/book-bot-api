@@ -1,7 +1,9 @@
-// src\utils\generateResponse.ts
-import { generateBookResponse } from "./responses/bookResponse"; // adjust path if needed
+// src\utils\working\generateResponse.ts
+import { generateBookResponse } from "../responses/bookResponse";
+import { generateGreetingResponse } from "../responses/greetingResponse";
+import { generateOrderStatusResponse } from "../responses/orderStatusResponse";
 
-type Intent =
+export type Intent =
   | "book_inquiry"
   | "order_status"
   | "complaint"
@@ -10,37 +12,44 @@ type Intent =
   | "goodbye"
   | "unknown";
 
-type ContentType = "book" | "receipt" | "text_only" | "unknown"; // update enum
+export type ContentType =
+  | "book"
+  | "receipt"
+  | "text_only"
+  | "unknown"
+  | "follow_up";
 
-interface AnalysisResult {
+export interface AnalysisResult {
   intent: Intent;
+  sessionId: string;
   confidence: number;
   userText: string;
   imageText: string;
   contentType?: ContentType;
   data?: any;
+  from: string;
 }
 
-export const generateResponse =async  ({
+export const generateResponse = async ({
   intent,
+  sessionId,
   confidence,
   userText,
   imageText,
   contentType,
   data,
-}: AnalysisResult):Promise<string> => {
+  from,
+}: AnalysisResult): Promise<string> => {
   if (intent === "book_inquiry" && confidence > 0.7 && contentType === "book") {
-  return await generateBookResponse(data);
-}
+    return await generateBookResponse(data, sessionId, userText);
+  }
 
-
-  if (intent === "order_status" && confidence > 0.7 && contentType === "receipt") {
-    const { order_id, date, total } = data || {};
-    if (order_id) {
-      return `📦 Checking order *#${order_id}*${date ? ` placed on ${date}` : ""}...`;
-    } else {
-      return `❓ I couldn't find an order ID. Please provide it so I can check the status.`;
-    }
+  if (
+    intent === "order_status" &&
+    confidence > 0.7 &&
+    contentType === "receipt"
+  ) {
+    return await generateOrderStatusResponse(data, sessionId, userText);
   }
 
   if (intent === "complaint" && confidence > 0.7) {
@@ -48,7 +57,7 @@ export const generateResponse =async  ({
   }
 
   if (intent === "greeting") {
-    return `👋 Hi there! How can I assist you today?`;
+    return await generateGreetingResponse(userText, sessionId);
   }
 
   if (intent === "smalltalk") {

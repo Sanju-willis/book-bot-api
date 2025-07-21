@@ -36,7 +36,7 @@ export const receiveMessage = async (req: Request, res: Response) => {
 
     //console.log("📨 Parsed Message:", msg);
     processedMessageIds.add(msg.messageId);
-   // console.log("prase", parsed);
+    // console.log("prase", parsed);
 
     let imageText = "";
     // 🧠 Conditional image text extraction
@@ -53,7 +53,7 @@ export const receiveMessage = async (req: Request, res: Response) => {
 
     await handleIncomingMessages({
       from: msg.from,
-      text: msg.text,
+      msgText: msg.text,
       imageText,
       mediaType: msg.mediaType,
       mediaId: msg.mediaId,

@@ -3,7 +3,7 @@ import type { InputType } from "../utils/parseWhatsappMessage";
 
 export interface IncomingWhatsappMessage {
   from: string;
-  text: string | null;
+  msgText: string | null;
   imageText?: string | null;
   mediaType: string | null;
   mediaId: string | null;

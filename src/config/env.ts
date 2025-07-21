@@ -20,3 +20,4 @@ export const WHATSAPP_VERIFY_TOKEN = getEnv("WHATSAPP_VERIFY_TOKEN");
 // ✅ Google Vision API
 export const GOOGLE_CLIENT_EMAIL = getEnv("GOOGLE_CLIENT_EMAIL");
 export const GOOGLE_PRIVATE_KEY = getEnv("GOOGLE_PRIVATE_KEY");
+export const DATABASE_URL = getEnv("DATABASE_URL");
