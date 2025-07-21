@@ -1,5 +1,5 @@
 // src\types\whatsapp.ts
-import type { InputType } from "../utils/parseWhatsappMessage";
+import type { InputType } from "../utils/parsers/parseWhatsappMessage";
 
 export interface IncomingWhatsappMessage {
   from: string;

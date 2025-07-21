@@ -7,7 +7,7 @@ import {
   getLangChainMemory,
   saveLangChainMemory,
 } from "../working/langchainMemoryStore";
-import { findBookInInventory } from "../../services/bookInventoryService";
+import { findBookInInventory } from "./services/bookInventoryService";
 
 const model = new ChatOpenAI({
   modelName: "gpt-4o",

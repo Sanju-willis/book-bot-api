@@ -86,4 +86,5 @@ export const handleIncomingMessages = async (
 
   // Send reply via WhatsApp
   await sendWhatsAppReply(from, responseText);
+  return responseText;
 };

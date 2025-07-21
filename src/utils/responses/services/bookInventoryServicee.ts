@@ -1,6 +1,6 @@
 // src\services\bookInventoryService.ts
-import { db } from "../db";
-import { books } from "../db/schema/books";
+import { db } from "../../../db";
+import { books } from "../../../db/schema/books";
 import { ilike, and } from "drizzle-orm";
 
 export const findBookInInventory = async (title: string, author?: string) => {
