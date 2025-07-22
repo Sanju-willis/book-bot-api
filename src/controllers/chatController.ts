@@ -1,6 +1,6 @@
 // src\controllers\chatController.ts
 import { Request, Response } from "express";
-import { extractImageText } from "../utils/visionService";
+import { extractImageText } from "../utils/transcription/visionService";
 import { handleIncomingMessages } from "../services/whatsappService";
 import { AppError } from "../errors/Errors";
 

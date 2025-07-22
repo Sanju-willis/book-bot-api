@@ -1,12 +1,12 @@
 // src\utils\visionService.ts
 import axios from "axios";
-import { WHATSAPP_ACCESS_TOKEN } from "../config/env";
-import { visionClient } from "../config/visionClient";
+import { WHATSAPP_ACCESS_TOKEN } from "../../config/env";
+import { visionClient } from "../../config/visionClient";
 import {
   MediaURLFetchError,
   MediaDownloadError,
   OCRServiceError,
-} from "../errors/Errors";
+} from "../../errors/Errors";
 
 export const extractImageText = async (mediaId: string): Promise<string> => {
   try {

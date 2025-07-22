@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { handleIncomingMessages } from "../services/whatsappService";
 import { parseWhatsappMessage } from "../utils/parsers/parseWhatsappMessage";
 import { WHATSAPP_VERIFY_TOKEN } from "../config/env";
-import { extractImageText } from "../utils/visionService";
+import { extractImageText } from "../utils/transcription/visionService";
 
 export const verifyWebhook = (req: Request, res: Response) => {
   const mode = req.query["hub.mode"];

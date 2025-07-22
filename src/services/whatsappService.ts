@@ -3,7 +3,7 @@ import { IncomingWhatsappMessage } from "../types/whatsapp";
 import { analyzeMessage } from "../utils/working/analyzeMessage";
 import { generateResponse } from "../utils/working/generateResponse";
 import { getOrCreateSessionId } from "../utils/working/sessionManager";
-import { sendWhatsAppReply } from "../utils/helpersReply/sendWhatsAppReply";
+import { sendWhatsAppReply } from "./reply/whatsappReplyService";
 import {
   saveSessionData,
   getSessionData,

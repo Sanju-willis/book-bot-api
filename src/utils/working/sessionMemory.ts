@@ -1,12 +1,5 @@
 // src\utils\working\sessionMemory.ts
-import type { Intent, ContentType } from "./generateResponse"; // adjust path if needed
-
-type SessionData = {
-  intent: Intent;
-  contentType: ContentType;
-  data: any;
-  lastUpdated: number;
-};
+import type { SessionData,Intent, ContentType } from "../../types/analyzeIntent";
 
 const sessionStore = new Map<string, SessionData>();
 
@@ -27,7 +20,6 @@ export const saveSessionData = (
 
   sessionStore.set(sessionId, sessionData);
 };
-
 
 export const getSessionData = (sessionId: string): SessionData | undefined => {
   return sessionStore.get(sessionId);

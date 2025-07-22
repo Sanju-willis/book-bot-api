@@ -11,6 +11,8 @@ export const OPENAI_API_KEY = getEnv("OPENAI_API_KEY");
 export const PORT = parseInt(getEnv("PORT"), 10);
 if (isNaN(PORT)) throw new EnvError("PORT must be a number");
 
+export const DEEPGRAM_API_KEY = getEnv("DEEPGRAM_API_KEY");
+
 // ✅ WhatsApp API
 export const PHONE_NUMBER_ID = getEnv("WHATSAPP_PHONE_NUMBER_ID");
 export const WHATSAPP_ACCESS_TOKEN = getEnv("WHATSAPP_ACCESS_TOKEN");
@@ -18,6 +20,8 @@ export const WHATSAPP_VERIFY_TOKEN = getEnv("WHATSAPP_VERIFY_TOKEN");
 
 
 export const VERIFY_TOKEN = getEnv("VERIFY_TOKEN");
+export const IG_BUSINESS_ID = getEnv("IG_BUSINESS_ID"); // ✅ new
+
 export const IG_PAGE_ACCESS_TOKEN = getEnv("IG_PAGE_ACCESS_TOKEN");
 // ✅ Google Vision API
 export const GOOGLE_CLIENT_EMAIL = getEnv("GOOGLE_CLIENT_EMAIL");

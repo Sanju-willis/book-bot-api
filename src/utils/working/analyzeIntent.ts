@@ -1,15 +1,16 @@
-// src\utils\working\analyzeMessage.ts
 import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { AnalyzeInput, AnalyzeResult } from "../../types/analyzeIntent";
 
 const model = new ChatOpenAI({
   modelName: "gpt-4o",
   temperature: 0,
 });
 
+// 🧠 Prompt includes msgType now
 const prompt = PromptTemplate.fromTemplate(`
-You are a message analyzer. Based on the user's message and any image text provided:
+You are a message analyzer. Based on the user's message, message type, and any extracted text (from image/audio/video):
 
 1. Detect the user's intent.
 2. Identify the content type: "book", "receipt", "text_only", or "other".
@@ -20,7 +21,7 @@ Respond ONLY in raw JSON format, like:
 {{
   "intent": "book_inquiry" | "order_status" | "complaint" | "greeting" | "smalltalk" | "goodbye" | "unknown",
   "confidence": float (0 to 1),
-  "content_type": "book" | "receipt" | "text_only" | "other",
+  "content_type": "book" | "receipt" | "text_only" | "unknown",
   "data": {{
     // If book:
     "title": "string",
@@ -33,43 +34,33 @@ Respond ONLY in raw JSON format, like:
     "date": "YYYY-MM-DD",
     "total": "Rs. amount",
     "items": ["item name", "item name", ...] (optional)
-}}
+  }}
 }}
 
-User typed message:
+Message type:
+"{msgType}"
+
+User typed message or caption:
 "{userText}"
 
-Text extracted from image:
-"{imageText}"
+Extracted content (e.g. from image, audio, or video):
+"{extractedText}"
 `);
 
 const chain = prompt.pipe(model).pipe(new JsonOutputParser());
 
-export type AnalyzeResult = {
-  intent:
-    | "book_inquiry"
-    | "order_status"
-    | "complaint"
-    | "general_help"
-    | "unknown";
-  confidence: number;
-  content_type: "book" | "receipt" | "text_only" | "unknown";
-  data: Record<string, any>;
-};
 
-type AnalyzeInput = {
-  userText: string;
-  imageText?: string;
-};
+
 
 export const analyzeMessage = async ({
   userText,
-  imageText = "",
+  extractedText = "",
+  msgType,
 }: AnalyzeInput): Promise<AnalyzeResult> => {
   try {
-    console.log("🔍 Analyzing message:", { userText, imageText });
+    console.log("🔍 Analyzing message:", { userText, extractedText, msgType });
 
-    const result = await chain.invoke({ userText, imageText });
+    const result = await chain.invoke({ userText, extractedText, msgType });
 
     console.log("✅ Analysis result:", result);
 

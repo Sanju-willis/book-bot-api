@@ -2,33 +2,8 @@
 import { generateBookResponse } from "../responses/bookResponse";
 import { generateGreetingResponse } from "../responses/greetingResponse";
 import { generateOrderStatusResponse } from "../responses/orderStatusResponse";
-
-export type Intent =
-  | "book_inquiry"
-  | "order_status"
-  | "complaint"
-  | "greeting"
-  | "smalltalk"
-  | "goodbye"
-  | "unknown";
-
-export type ContentType =
-  | "book"
-  | "receipt"
-  | "text_only"
-  | "unknown"
-  | "follow_up";
-
-export interface AnalysisResult {
-  intent: Intent;
-  sessionId: string;
-  confidence: number;
-  userText: string;
-  imageText: string;
-  contentType?: ContentType;
-  data?: any;
-  from: string;
-}
+import { AnalysisResult } from "../../types/generateResponse";
+import {} from "../../types/analyzeIntent";
 
 export const generateResponse = async ({
   intent,
@@ -56,16 +31,8 @@ export const generateResponse = async ({
     return `😔 I'm sorry to hear that. Can you please share more details so we can resolve it quickly?`;
   }
 
-  if (intent === "greeting") {
+  if (intent === "general_help") {
     return await generateGreetingResponse(userText, sessionId);
-  }
-
-  if (intent === "smalltalk") {
-    return `🙂 Nice chatting with you! Let me know if you need help with something.`;
-  }
-
-  if (intent === "goodbye") {
-    return `👋 Take care! Let us know if you need anything later.`;
   }
 
   return `🤖 Thanks for your message! We'll get back to you shortly.`;
