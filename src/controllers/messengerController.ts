@@ -1,6 +1,6 @@
 // src/controllers/messengerController.ts
 import { Request, Response } from "express";
-import { sendMessengerReply } from "../services/messengerService";
+import { sendMessengerReply } from "../services/reply/messengerReplyService";
 import { parseMessengerWebhook } from "../utils/parsers/messengerParser";
 import { extractMessengerAnalytics } from "../utils/analytics/extractMessengerAnalytics";
 

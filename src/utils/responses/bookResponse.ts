@@ -6,7 +6,7 @@ import {
 } from "./prompts/bookPrompts";
 import { chatModel } from "../../config/model";
 import { createChatMemory, persistChatMemory } from "./helpers/messageMemory";
-import { saveLangChainMemory } from "../working/langchainMemoryStore";
+import { saveLangChainMemory } from "./helpers/langchainMemoryStore";
 import { findBookInInventory } from "./services/bookInventoryService";
 
 // 👁️ Detect intent

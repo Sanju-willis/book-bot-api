@@ -1,6 +1,6 @@
 // src\controllers\whatsappController.ts
 import { Request, Response } from "express";
-import { handleIncomingMessages } from "../services/whatsappServices";
+import { handleIncomingMessages } from "../services/messageProcessor";
 import { parseWhatsappMessages } from "../utils/parsers/parseWhatsapp";
 import { WHATSAPP_VERIFY_TOKEN } from "../config/env";
 import { extractImageText } from "../utils/transcription/visionService";

@@ -6,7 +6,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
 import {
   getLangChainMemory,
   saveLangChainMemory,
-} from "../working/langchainMemoryStore";
+} from "./helpers/langchainMemoryStore";
 import { chatModel } from "../../config/model";
 
 const prompt = PromptTemplate.fromTemplate(`

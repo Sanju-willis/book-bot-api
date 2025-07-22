@@ -2,7 +2,7 @@ import { BufferMemory } from "langchain/memory";
 import {
   getLangChainMemory,
   saveLangChainMemory,
-} from "../../working/langchainMemoryStore";
+} from "./langchainMemoryStore";
 
 export const createChatMemory = async (
   sessionId: string,

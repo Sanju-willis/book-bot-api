@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { VERIFY_TOKEN } from "../config/env";
-import { sendInstagramReply } from "../services/instagramService";
+import { sendInstagramReply } from "../services/reply/instagramReplyService";
 
 export const verifyInstagramWebhook = async (req: Request, res: Response): Promise<void> => {
   const mode = req.query["hub.mode"];
