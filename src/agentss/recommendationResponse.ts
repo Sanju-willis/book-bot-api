@@ -1,4 +1,4 @@
-import { chatModel } from "../../config/model";
+import { chatModel } from "@/config/model";
 import { bookRecommendationPrompt } from "./prompts/recommedPrompts";
 import { createChatMemory, persistChatMemory } from "./helpers/messageMemory";
 import { RunnableSequence } from "@langchain/core/runnables";

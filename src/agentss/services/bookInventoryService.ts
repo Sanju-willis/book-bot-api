@@ -1,7 +1,7 @@
 // src\utils\responses\services\bookInventoryService.ts
 // src/services/bookInventoryService.ts
-import { db } from "../../../db";
-import { books } from "../../../db/schema/books";
+import { db } from "@/db";
+import { books } from "@/db/schema/books";
 import { eq, and } from "drizzle-orm";
 
 export const findBookInInventory = async (title: string, author: string) => {

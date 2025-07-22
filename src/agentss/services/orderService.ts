@@ -1,7 +1,7 @@
 // src\utils\responses\services\orderService.ts
 import { eq } from "drizzle-orm";
-import { db } from "../../../db";
-import { orders } from "../../../db/schema/orders";
+import { db } from "@/db";
+import { orders } from "@/db/schema/orders";
 
 export const findOrderById = async (orderId: string) => {
   try {

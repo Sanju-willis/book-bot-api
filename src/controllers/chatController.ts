@@ -1,7 +1,7 @@
 // src\controllers\chatController.ts
 import { Request, Response } from "express";
 import { extractImageText } from "../utils/transcription/visionService";
-import { handleIncomingMessages } from "../services/whatsappService";
+import { handleIncomingMessages } from "@/services/messageProcessor";
 
 const processedMessageIds = new Set<string>();
 

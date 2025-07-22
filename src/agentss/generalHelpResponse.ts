@@ -7,7 +7,7 @@ import {
   getLangChainMemory,
   saveLangChainMemory,
 } from "./helpers/langchainMemoryStore";
-import { chatModel } from "../../config/model";
+import { chatModel } from "@/config/model";
 
 const prompt = PromptTemplate.fromTemplate(`
 You're a friendly AI assistant for a bookstore. When a user sends a greeting, reply warmly and briefly offer help.

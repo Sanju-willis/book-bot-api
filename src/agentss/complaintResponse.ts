@@ -1,4 +1,4 @@
-import { chatModel } from "../../config/model";
+import { chatModel } from "@/config/model";
 import { complaintFollowupPrompt } from "./prompts/generalPrompts";
 import { createChatMemory, persistChatMemory } from "./helpers/messageMemory";
 import { RunnableSequence } from "@langchain/core/runnables";

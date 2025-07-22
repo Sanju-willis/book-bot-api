@@ -1,10 +1,10 @@
-import { generateBookResponse } from "../responses/bookResponse";
-import { generateGreetingResponse } from "../responses/generalHelpResponse";
-import { generateOrderStatusResponse } from "../responses/orderStatusResponse";
-import { generateRecommendationResponse } from "../responses/recommendationResponse";
-import { generateComplaintResponse } from "../responses/complaintResponse";
+import { generateBookResponse } from "@/agentss/bookResponse";
+import { generateGreetingResponse } from "@/agentss/generalHelpResponse";
+import { generateOrderStatusResponse } from "@/agentss/orderStatusResponse";
+import { generateRecommendationResponse } from "@/agentss/recommendationResponse";
+import { generateComplaintResponse } from "@/agentss/complaintResponse";
 
-import { AnalysisResult } from "../../types/generateResponse";
+import { AnalysisResult } from "@/types/generateResponse";
 
 export const generateResponse = async ({
   intent,

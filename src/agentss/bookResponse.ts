@@ -4,7 +4,7 @@ import {
   detectBookIntentPrompt,
   bookFallbackPrompt,
 } from "./prompts/bookPrompts";
-import { chatModel } from "../../config/model";
+import { chatModel } from "@/config/model";
 import { createChatMemory, persistChatMemory } from "./helpers/messageMemory";
 import { saveLangChainMemory } from "./helpers/langchainMemoryStore";
 import { findBookInInventory } from "./services/bookInventoryService";

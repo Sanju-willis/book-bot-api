@@ -1,9 +1,11 @@
 // src\controllers\whatsappController.ts
 import { Request, Response } from "express";
-import { handleIncomingMessages } from "../services/whatsappService";
-import { parseWhatsappMessage } from "../utils/parsers/parseWhatsappMessage";
+import { handleIncomingMessages } from "../services/messageProcessor";
+import { parseWhatsappMessages } from "../utils/parsers/whatsappParser";
 import { WHATSAPP_VERIFY_TOKEN } from "../config/env";
 import { extractImageText } from "../utils/transcription/visionService";
+import { extractAudioText } from "../utils/transcription/extractAudioText";
+import { extractVideoText } from "../utils/transcription/extractVideoText";
 
 export const verifyWebhook = (req: Request, res: Response) => {
   const mode = req.query["hub.mode"];
@@ -22,44 +24,75 @@ const processedMessageIds = new Set<string>();
 
 export const receiveMessage = async (req: Request, res: Response) => {
   const body = req.body;
-  const parsed = parseWhatsappMessage(body);
+  const parsed = parseWhatsappMessages(body);
+  console.log("📦 Parsed WhatsApp Messages:", JSON.stringify(parsed, null, 2));
+
   if (parsed.length === 0) {
     res.sendStatus(200);
     return;
   }
 
   for (const msg of parsed) {
-    if (processedMessageIds.has(msg.messageId)) {
-      console.log("⚠️ Duplicate message ID, skipping:", msg.messageId);
+    const { user, message } = msg;
+    const { from, name } = user;
+
+    // ✅ Extract full fields safely
+    const {
+      msgType,
+      text,
+      caption,
+      mediaId,
+      image,
+      audio,
+      video,
+      timestamp,
+      messageId,
+    } = message;
+
+    const type = msgType;
+    const resolvedMediaId = mediaId || image || audio || video;
+    const userText = text?.trim() || caption?.trim() || "";
+
+    if (processedMessageIds.has(messageId)) {
+      console.log("⚠️ Duplicate message ID, skipping:", messageId);
       continue;
     }
 
-    //console.log("📨 Parsed Message:", msg);
-    processedMessageIds.add(msg.messageId);
-    // console.log("prase", parsed);
+    processedMessageIds.add(messageId);
 
-    let imageText = "";
-    // 🧠 Conditional image text extraction
-    if (msg.inputType === "image_only" || msg.inputType === "image_with_text") {
-      if (msg.mediaId) {
-        try {
-          imageText = await extractImageText(msg.mediaId);
-          console.log("🧠  image:", imageText);
-        } catch (err) {
-          console.warn("⚠️ Failed to extract image text:", err);
-        }
+    let extractedText = "";
+
+    try {
+      if (type === "image" && resolvedMediaId) {
+        console.log("📷 Calling extractImageText with:", resolvedMediaId);
+        extractedText = await extractImageText(resolvedMediaId);
+        console.log("🧠 Extracted image text:", extractedText);
+      } else if (type === "audio" && resolvedMediaId) {
+        console.log("🎤 Calling extractAudioText with:", resolvedMediaId);
+        extractedText = await extractAudioText(resolvedMediaId);
+        console.log("🧠 Extracted audio text:", extractedText);
+      } else if (type === "video" && resolvedMediaId) {
+        console.log("🎞️ Calling extractVideoText with:", resolvedMediaId);
+        extractedText = await extractVideoText(resolvedMediaId);
+        console.log("🧠 Extracted video text:", extractedText);
+      } else {
+        console.log("⚠️ No extractor matched for:", { type, resolvedMediaId });
       }
+    } catch (err) {
+      console.warn(`⚠️ Failed to extract ${type} content:`, err);
     }
 
     await handleIncomingMessages({
-      from: msg.from,
-      msgText: msg.text,
-      imageText,
-      mediaType: msg.mediaType,
-      mediaId: msg.mediaId,
-      name: msg.name,
-      timestamp: msg.timestamp,
-      inputType: msg.inputType,
+      platform: "whatsapp",
+      user: { from, name },
+      message: {
+        msgType: type,
+        text: userText,
+        extractedText: extractedText || "",
+        mediaId,
+        timestamp,
+        messageId,
+      },
     });
   }
 

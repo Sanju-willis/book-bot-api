@@ -4,7 +4,7 @@ import { ConversationChain } from "langchain/chains";
 import { createChatMemory, persistChatMemory } from "./helpers/messageMemory";
 import { extractOrderIdFromText } from "./helpers/textExtractors";
 import { findOrderById } from "./services/orderService";
-import { chatModel } from "../../config/model";
+import { chatModel } from "@/config/model";
 
 export const generateOrderStatusResponse = async (
   data: any,

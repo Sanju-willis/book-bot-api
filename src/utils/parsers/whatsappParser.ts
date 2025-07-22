@@ -1,5 +1,4 @@
 // src/utils/parsers/parseWhatsappMessage.ts
-import { User, Message } from "../../types/controller-types";
 
 export const parseWhatsappMessages = (body: any) => {
   const messages = body.entry?.[0]?.changes?.[0]?.value?.messages || [];
