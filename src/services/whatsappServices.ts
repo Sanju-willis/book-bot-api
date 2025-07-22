@@ -9,32 +9,30 @@ import { sendWhatsAppReply } from "./reply/whatsappReplyService";
 import { IncomingMessage } from "../types/processService";
 
 export const handleIncomingMessages = async ({
+  platform,
   user,
   message,
 }: IncomingMessage) => {
   const { from, name } = user;
-  const { msgType, text, extractedText, mediaId, timestamp, messageId } =
-    message;
+  const { msgType, text, extractedText, timestamp } = message;
 
+  const mergedText = text;
   const sessionId = await getOrCreateSessionId(from, timestamp);
   console.log("🪪 Session ID:", sessionId);
 
   const existingData = getSessionData(sessionId);
-  const isFollowUp =
-    existingData &&
-    text &&
-    !text.toLowerCase().includes("book") &&
-    !text.toLowerCase().includes("new");
+  const isFollowUp = existingData && mergedText && mergedText.length < 30;
 
   if (isFollowUp) {
     console.log("↩️ Detected follow-up, skipping intent analysis");
+
     const responseText = await generateResponse({
       sessionId,
       from,
       intent: existingData.intent,
       confidence: 1,
-      userText: text,
-      imageText: "",
+      userText: mergedText,
+      imageText: extractedText || "",
       contentType: existingData.contentType,
       data: existingData.data,
     });
@@ -42,11 +40,11 @@ export const handleIncomingMessages = async ({
     return await sendWhatsAppReply(from, responseText);
   }
 
-  // ✅ Run analysis first
+  // ✅ Run AI analysis
   const analysis = await analyzeMessage({
-    userText: text,
-    extractedText, // optional: rename from imageText for clarity
-    msgType, // "text", "image", "audio", "video", etc.
+    msgType,
+    userText: mergedText,
+    extractedText,
   });
 
   const { intent, confidence, content_type, data } = analysis;
@@ -62,8 +60,8 @@ export const handleIncomingMessages = async ({
     from,
     intent,
     confidence,
-    userText: text,
-    imageText: "",
+    userText: mergedText,
+    imageText: extractedText || "",
     contentType: content_type,
     data,
   });

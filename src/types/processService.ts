@@ -1,4 +1,5 @@
 export interface IncomingMessage {
+  platform: string;
   user: {
     from: string;
     name: string;

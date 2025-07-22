@@ -25,6 +25,8 @@ const processedMessageIds = new Set<string>();
 export const receiveMessage = async (req: Request, res: Response) => {
   const body = req.body;
   const parsed = parseWhatsappMessages(body);
+  console.log("📦 Parsed WhatsApp Messages:", JSON.stringify(parsed, null, 2));
+
   if (parsed.length === 0) {
     res.sendStatus(200);
     return;
@@ -33,7 +35,23 @@ export const receiveMessage = async (req: Request, res: Response) => {
   for (const msg of parsed) {
     const { user, message } = msg;
     const { from, name } = user;
-    const { type, text, mediaId, timestamp, messageId } = message;
+
+    // ✅ Extract full fields safely
+    const {
+      msgType,
+      text,
+      caption,
+      mediaId,
+      image,
+      audio,
+      video,
+      timestamp,
+      messageId,
+    } = message;
+
+    const type = msgType;
+    const resolvedMediaId = mediaId || image || audio || video;
+    const userText = text?.trim() || caption?.trim() || "";
 
     if (processedMessageIds.has(messageId)) {
       console.log("⚠️ Duplicate message ID, skipping:", messageId);
@@ -45,25 +63,31 @@ export const receiveMessage = async (req: Request, res: Response) => {
     let extractedText = "";
 
     try {
-      if (type === "image" && mediaId) {
-        extractedText = await extractImageText(mediaId);
+      if (type === "image" && resolvedMediaId) {
+        console.log("📷 Calling extractImageText with:", resolvedMediaId);
+        extractedText = await extractImageText(resolvedMediaId);
         console.log("🧠 Extracted image text:", extractedText);
-      } else if (type === "audio" && mediaId) {
-        extractedText = await extractAudioText(mediaId);
+      } else if (type === "audio" && resolvedMediaId) {
+        console.log("🎤 Calling extractAudioText with:", resolvedMediaId);
+        extractedText = await extractAudioText(resolvedMediaId);
         console.log("🧠 Extracted audio text:", extractedText);
-      } else if (type === "video" && mediaId) {
-        extractedText = await extractVideoText(mediaId);
+      } else if (type === "video" && resolvedMediaId) {
+        console.log("🎞️ Calling extractVideoText with:", resolvedMediaId);
+        extractedText = await extractVideoText(resolvedMediaId);
         console.log("🧠 Extracted video text:", extractedText);
+      } else {
+        console.log("⚠️ No extractor matched for:", { type, resolvedMediaId });
       }
     } catch (err) {
       console.warn(`⚠️ Failed to extract ${type} content:`, err);
     }
 
     await handleIncomingMessages({
+      platform: "whatsapp",
       user: { from, name },
       message: {
         msgType: type,
-        text: text || "",
+        text: userText,
         extractedText: extractedText || "",
         mediaId,
         timestamp,

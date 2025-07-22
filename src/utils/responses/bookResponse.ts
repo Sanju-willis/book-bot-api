@@ -1,96 +1,128 @@
-// src\utils\responses\bookResponse.ts
-import { ChatOpenAI } from "@langchain/openai";
-import { PromptTemplate } from "@langchain/core/prompts";
-import { ConversationChain } from "langchain/chains";
+import { RunnableSequence } from "@langchain/core/runnables";
 import { BufferMemory } from "langchain/memory";
 import {
-  getLangChainMemory,
-  saveLangChainMemory,
-} from "../working/langchainMemoryStore";
+  detectBookIntentPrompt,
+  bookFallbackPrompt,
+} from "./prompts/bookPrompts";
+import { chatModel } from "../../config/model";
+import { createChatMemory, persistChatMemory } from "./helpers/messageMemory";
+import { saveLangChainMemory } from "../working/langchainMemoryStore";
 import { findBookInInventory } from "./services/bookInventoryService";
 
-const model = new ChatOpenAI({
-  modelName: "gpt-4o",
-  temperature: 0.3,
-});
+// 👁️ Detect intent
+const detectBookIntent = async (
+  userText: string
+): Promise<"find_book" | "get_price" | "check_stock" | "unknown"> => {
+  const intentChain = detectBookIntentPrompt.pipe(chatModel);
 
-const prompt = PromptTemplate.fromTemplate(`
-You're a helpful bookstore assistant.
+  try {
+    const result = await intentChain.invoke({ input: userText });
+    const intent = String(result?.content || "")
+      .trim()
+      .toLowerCase();
 
-Your job is to answer questions and help users about books using the provided context.
-
-Keep the conversation friendly and brief. If you've already answered a question about this book, follow up naturally without repeating.
-
-Chat History:
-{chat_history}
-
-User Message:
-{input}
-
-Assistant:
-`);
-
-const createMemory = async (sessionId: string) => {
-  const memory = new BufferMemory({
-    returnMessages: true,
-    memoryKey: "chat_history",
-    inputKey: "input",
-    outputKey: "response",
-  });
-
-  const previousMessages = getLangChainMemory(sessionId);
-  if (previousMessages) {
-    await memory.chatHistory.addMessages(previousMessages);
+    if (
+      intent === "find_book" ||
+      intent === "get_price" ||
+      intent === "check_stock"
+    ) {
+      return intent;
+    }
+    return "unknown";
+  } catch {
+    return "unknown";
   }
-
-  return memory;
 };
 
+// 🧠 Extract last mentioned book from memory (for follow-ups)
+const getLastBookMentioned = async (memory: BufferMemory) => {
+  const messages = await memory.chatHistory.getMessages();
+  const reversed = [...messages].reverse();
+
+  for (const msg of reversed) {
+    const content =
+      typeof msg.content === "string" ? msg.content.toLowerCase() : "";
+    const titleMatch = content.match(/(?:book|title)[\s:]*"?(.+?)"?[,\.]?/i);
+    const authorMatch = content.match(/(?:author)[\s:]*"?(.+?)"?[,\.]?/i);
+
+    if (titleMatch) {
+      return {
+        title: titleMatch[1].trim(),
+        author: authorMatch?.[1]?.trim() || "",
+      };
+    }
+  }
+
+  return { title: "", author: "" };
+};
+
+// 🧠 Main response logic
 export const generateBookResponse = async (
   data: any,
   sessionId: string,
   userText: string
 ): Promise<string> => {
-  const { title = "", author = "" } = data || {};
-  console.log("📘 [generateBookResponse] Data:", {
-    sessionId,
-    title,
-    author,
-    userText,
-  });
+  let { title = "", author = "" } = data || {};
 
-  if (!title && !author) {
-    return "❓ I couldn't extract the book title. Could you type it manually?";
+  const memory = await createChatMemory(sessionId);
+  const intent = await detectBookIntent(userText);
+
+  console.log("🎯 Intent:", intent, "| Raw title:", title);
+
+  if (!title) {
+    const last = await getLastBookMentioned(memory);
+    title = last.title;
+    author = last.author;
+    console.log("🧠 Used memory fallback:", { title, author });
   }
 
-  const memory = await createMemory(sessionId);
-  let bookInfo = `Book: "${title}" by ${author}`;
+  if (!title && intent !== "find_book") {
+    return "❓ Can you tell me the book title you're referring to?";
+  }
 
-  // 🔍 Try DB lookup
   const book = await findBookInInventory(title, author);
-  if (book) {
-    return `📘 *${book.title}* by ${book.author} is available — Rs.${book.price}. (${book.stock} in stock)`;
+
+  if (intent === "find_book") {
+    return `📘 Got it! You're looking for *${title}*. Want to know the price or check availability?`;
   }
 
-  const enrichedInput = `${userText}\n\n${bookInfo}`;
+  if (intent === "get_price") {
+    if (!book)
+      return `❌ I couldn't find *${title}*. Could you double-check the title?`;
+    return `💰 *${book.title}* is Rs.${book.price}.`;
+  }
+
+  if (intent === "check_stock") {
+    if (!book)
+      return `❌ I couldn't find *${title}*. Can you confirm the name?`;
+    return book.stock > 0
+      ? `📦 *${book.title}* is in stock — ${book.stock} copies left.`
+      : `🚫 *${book.title}* is currently out of stock.`;
+  }
+
+  const fallbackChain = RunnableSequence.from([bookFallbackPrompt, chatModel]);
 
   try {
-    const chain = new ConversationChain({
-      llm: model,
-      memory,
-      prompt,
+    const enrichedInput = userText;
+
+    const result = await fallbackChain.invoke({
+      input: enrichedInput,
+      chat_history: await memory.chatHistory.getMessages(),
     });
 
-    const result = await chain.call({ input: enrichedInput });
+    await memory.saveContext(
+      { input: enrichedInput },
+      { response: result.content || "" }
+    );
 
     const updatedMessages = await memory.chatHistory.getMessages();
     saveLangChainMemory(sessionId, updatedMessages);
 
-    return typeof result.response === "string"
-      ? result.response.trim()
-      : "🤖 Got your request. Checking availability...";
+    return (
+      String(result.content || "").trim() || "🤖 Got your message. Checking..."
+    );
   } catch (err) {
-    console.error("❌ [generateBookResponse] LangChain error:", err);
-    return "⚠️ Something went wrong while checking the book. Please try again.";
+    console.error("❌ Error generating fallback response:", err);
+    return "⚠️ Something went wrong. Please try again.";
   }
 };

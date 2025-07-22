@@ -7,11 +7,7 @@ import {
   getLangChainMemory,
   saveLangChainMemory,
 } from "../working/langchainMemoryStore";
-
-const model = new ChatOpenAI({
-  modelName: "gpt-4o",
-  temperature: 0.5,
-});
+import { chatModel } from "../../config/model";
 
 const prompt = PromptTemplate.fromTemplate(`
 You're a friendly AI assistant for a bookstore. When a user sends a greeting, reply warmly and briefly offer help.
@@ -38,7 +34,7 @@ export const generateGreetingResponse = async (
     }
 
     const chain = new ConversationChain({
-      llm: model,
+      llm: chatModel,
       memory,
       prompt,
     });

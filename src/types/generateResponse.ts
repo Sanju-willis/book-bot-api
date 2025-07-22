@@ -1,6 +1,7 @@
 export type Intent =
   | "general_help"
   | "book_inquiry"
+  | "recommend_book"
   | "order_status"
   | "complaint"
   | "unknown";

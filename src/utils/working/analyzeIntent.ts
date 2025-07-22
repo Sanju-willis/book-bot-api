@@ -2,6 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { AnalyzeInput, AnalyzeResult } from "../../types/analyzeIntent";
+import { AnalyzeIntentError } from "../../errors/Errors";
 
 const model = new ChatOpenAI({
   modelName: "gpt-4o",
@@ -19,7 +20,7 @@ You are a message analyzer. Based on the user's message, message type, and any e
 Respond ONLY in raw JSON format, like:
 
 {{
-  "intent": "book_inquiry" | "order_status" | "complaint" | "greeting" | "smalltalk" | "goodbye" | "unknown",
+  "intent": "general_help" | "book_inquiry" | "order_status" | "complaint" | "unknown",
   "confidence": float (0 to 1),
   "content_type": "book" | "receipt" | "text_only" | "unknown",
   "data": {{
@@ -34,8 +35,15 @@ Respond ONLY in raw JSON format, like:
     "date": "YYYY-MM-DD",
     "total": "Rs. amount",
     "items": ["item name", "item name", ...] (optional)
-  }}
 }}
+}}
+
+Intent definitions:
+- "general_help": user says "hi", "hello", "hey", or asks for help but without asking about a book or order.
+- "book_inquiry": message is about finding a book.
+- "order_status": message is about a past purchase.
+- "complaint": message sounds negative or reports a problem.
+- "unknown": unclear message or not related to bookstore.
 
 Message type:
 "{msgType}"
@@ -49,16 +57,13 @@ Extracted content (e.g. from image, audio, or video):
 
 const chain = prompt.pipe(model).pipe(new JsonOutputParser());
 
-
-
-
 export const analyzeMessage = async ({
+  msgType,
   userText,
   extractedText = "",
-  msgType,
 }: AnalyzeInput): Promise<AnalyzeResult> => {
   try {
-    console.log("🔍 Analyzing message:", { userText, extractedText, msgType });
+    console.log("🔍 Analyzing message:", { msgType, userText, extractedText });
 
     const result = await chain.invoke({ userText, extractedText, msgType });
 
@@ -67,11 +72,6 @@ export const analyzeMessage = async ({
     return result as AnalyzeResult;
   } catch (err) {
     console.error("❌ analyzeMessage failed:", err);
-    return {
-      intent: "unknown",
-      confidence: 0,
-      content_type: "unknown",
-      data: {},
-    };
+    throw new AnalyzeIntentError("Message analysis failed", err);
   }
 };

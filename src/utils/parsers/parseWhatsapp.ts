@@ -24,7 +24,13 @@ export const parseWhatsappMessages = (body: any) => {
     if (msgType === "image") {
       const mediaId = msg.image?.id;
       const caption = msg.image?.caption || "";
-      const base = { msgType, image: mediaId, timestamp, messageId };
+      const base = {
+        msgType,
+        mediaId,
+        image: mediaId,
+        timestamp,
+        messageId,
+      };
       return {
         user: { from, name },
         message: caption ? { ...base, caption } : base,
@@ -34,7 +40,13 @@ export const parseWhatsappMessages = (body: any) => {
     if (msgType === "video") {
       const mediaId = msg.video?.id;
       const caption = msg.video?.caption || "";
-      const base = { msgType, video: mediaId, timestamp, messageId };
+      const base = {
+        msgType,
+        mediaId,
+        video: mediaId,
+        timestamp,
+        messageId,
+      };
       return {
         user: { from, name },
         message: caption ? { ...base, caption } : base,
@@ -45,14 +57,26 @@ export const parseWhatsappMessages = (body: any) => {
       const mediaId = msg.audio?.id;
       return {
         user: { from, name },
-        message: { msgType, audio: mediaId, timestamp, messageId },
+        message: {
+          msgType,
+          mediaId,
+          audio: mediaId,
+          timestamp,
+          messageId,
+        },
       };
     }
 
     if (msgType === "document") {
       const mediaId = msg.document?.id;
       const caption = msg.document?.caption || "";
-      const base = { msgType, document: mediaId, timestamp, messageId };
+      const base = {
+        msgType,
+        mediaId,
+        document: mediaId,
+        timestamp,
+        messageId,
+      };
       return {
         user: { from, name },
         message: caption ? { ...base, caption } : base,

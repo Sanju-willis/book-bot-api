@@ -17,6 +17,7 @@ export type ContentType =
   | "text_only"
   | "unknown"
 
+  
 export type AnalyzeResult = {
   intent: Intent;
   confidence: number;
