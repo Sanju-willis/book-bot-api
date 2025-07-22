@@ -7,7 +7,7 @@ import {
 import { chatModel } from "@/config/model";
 import { createChatMemory, persistChatMemory } from "./helpers/messageMemory";
 import { saveLangChainMemory } from "./helpers/langchainMemoryStore";
-import { findBookInInventory } from "./services/bookInventoryService";
+import { findBookInInventory } from "../services/bookInventoryService";
 
 // 👁️ Detect intent
 const detectBookIntent = async (
